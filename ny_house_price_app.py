@@ -133,7 +133,7 @@ with st.sidebar:
 def load_data():
     try:
         # Replace with your raw GitHub URL
-        url = "https://github.com/AyushmanShrestha2000/nyc-housing/blob/main/NY-House-Dataset.csv"
+        url = "https://raw.githubusercontent.com/AyushmanShrestha2000/nyc-housing/main/NY-House-Dataset.csv"
         data = pd.read_csv(url)
         st.session_state['data_loaded'] = True
         return data
