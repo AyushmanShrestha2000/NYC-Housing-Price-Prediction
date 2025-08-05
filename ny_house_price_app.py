@@ -129,15 +129,17 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-@st.cache_data  # Cache the data loading to avoid reloading on every interaction
+@st.cache_data
 def load_data():
     try:
-        data = pd.read_csv('NY-House-Dataset.csv')  # Load dataset from CSV file
+        # Replace with your raw GitHub URL
+        url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/NY-House-Dataset.csv"
+        data = pd.read_csv(url)
         st.session_state['data_loaded'] = True
         return data
     except Exception as e:
         st.session_state['data_loaded'] = False
-        st.error(f"Error loading data: {str(e)}")  # Show error if loading fails
+        st.error(f"Error loading data: {str(e)}")
         return None
 
 data = load_data()
