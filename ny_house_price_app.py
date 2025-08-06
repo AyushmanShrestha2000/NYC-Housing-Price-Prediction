@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -11,8 +12,54 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder, PolynomialFeatu
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from io import StringIO
+import requests
 import warnings
-warnings.filterwarnings('ignore')  # Ignore warnings for cleaner output
+warnings.filterwarnings('ignore')
+
+# ==============================================
+# DATA LOADING WITH FALLBACK SOURCES
+# ==============================================
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def load_data():
+    """Load dataset with multiple fallback sources"""
+    data_sources = [
+        # Primary source - GitHub raw URL
+        "https://raw.githubusercontent.com/AyushmanShrestha2000/nyc-housing/main/NY-House-Dataset.csv",
+        
+        # Fallback sources
+        "NY-House-Dataset.csv",
+        "data/NY-House-Dataset.csv"
+    ]
+    
+    for source in data_sources:
+        try:
+            if source.startswith('http'):
+                response = requests.get(source)
+                response.raise_for_status()
+                data = pd.read_csv(StringIO(response.text))
+            else:
+                data = pd.read_csv(source)
+                
+            if not data.empty:
+                st.session_state.data_source = source
+                return data
+                
+        except Exception as e:
+            st.warning(f"Failed to load from {source}: {str(e)}")
+            continue
+            
+    st.error("All data sources failed!")
+    return None
+
+# Initialize data
+if 'data' not in st.session_state:
+    st.session_state.data = load_data()
+    st.session_state.data_loaded = st.session_state.data is not None
+
+if not st.session_state.get('data_loaded', False):
+    st.error("❗ Dataset not loaded. Please check the data file.")
+    st.stop()
 
 # ==============================================
 # PAGE CONFIGURATION & CUSTOM STYLES
@@ -24,7 +71,6 @@ st.set_page_config(
     page_icon="🏠"
 )
 
-# Custom CSS styling to make the app look nicer
 st.markdown("""
 <style>
     body {
@@ -110,44 +156,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 # ==============================================
-# SIDEBAR & DATA LOADING
+# SIDEBAR CONFIGURATION
 # ==============================================
 with st.sidebar:
-    # Sidebar header with title and subtitle
     st.markdown('<div style="text-align: center; margin-bottom: 2rem;">'
                 '<h2 style="color: white; margin-bottom: 0;">🏠 NYC Home Price Predictor</h2>'
                 '<p style="color: #ecf0f1;">AI-powered real estate valuation</p>'
                 '</div>', unsafe_allow_html=True)
     
-    # Menu to navigate between pages
     page = st.radio(
         "Menu",
         ["📋 Dataset Overview", "📈 Market Analysis", "🤖 Price Prediction Models", "💲 Get Price Estimate"],
         index=0,
         label_visibility="collapsed"
     )
-
-@st.cache_resource
-def load_data():
-    try:
-        # Replace with your raw GitHub URL
-        url = "https://raw.githubusercontent.com/AyushmanShrestha2000/nyc-housing/main/NY-House-Dataset.csv"
-        data = pd.read_csv(url)
-        st.session_state['data_loaded'] = True
-        return data
-    except Exception as e:
-        st.session_state['data_loaded'] = False
-        st.error(f"Error loading data: {str(e)}")
-        return None
-
-data = load_data()
-
-if not st.session_state.get('data_loaded', False):
-    st.error("❗ Dataset not loaded. Please check the data file.")
-    st.stop()  # Stop the app if data is not loaded
-
+    
+    # Debug info
+    with st.expander("ℹ️ Data Source Info"):
+        if 'data_source' in st.session_state:
+            st.success(f"Data loaded from: {st.session_state.data_source}")
+        else:
+            st.warning("Data source not recorded")
+        
+        if st.button("🔄 Reload Data"):
+            st.session_state.data = load_data()
+            st.rerun()
 
 # ==============================================
 # MAIN PAGE CONTENT
@@ -155,106 +189,94 @@ if not st.session_state.get('data_loaded', False):
 st.markdown('<h1 class="main-header">🏠 NYC Home Price Predictor</h1>', unsafe_allow_html=True)
 
 if page == "📋 Dataset Overview":
-    # Show basic information about the dataset
     st.markdown("### 📊 Explore the NYC Housing Dataset")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total Properties", f"{data.shape[0]:,}")  # Number of rows
-        st.metric("Number of Features", data.shape[1])  # Number of columns
+        st.metric("Total Properties", f"{st.session_state.data.shape[0]:,}")
+        st.metric("Number of Features", st.session_state.data.shape[1])
     with col2:
-        st.metric("Average Price", f"${data['PRICE'].mean():,.0f}")  # Average home price
-        st.metric("Price Range", f"${data['PRICE'].min():,.0f} - ${data['PRICE'].max():,.0f}")  # Min and max price
+        st.metric("Average Price", f"${st.session_state.data['PRICE'].mean():,.0f}")
+        st.metric("Price Range", f"${st.session_state.data['PRICE'].min():,.0f} - ${st.session_state.data['PRICE'].max():,.0f}")
     
-    # Show first 10 rows of the data in an expandable table
     with st.expander("🔍 Data Preview", expanded=True):
-        st.dataframe(data.head(10))
+        st.dataframe(st.session_state.data.head(10))
     
-    # Tabs for data types, statistics, and missing data overview
     tab1, tab2, tab3 = st.tabs(["📝 Structure", "📈 Statistics", "❓ Missing Data"])
     with tab1:
-        st.dataframe(pd.DataFrame(data.dtypes, columns=['Data Type']))  # Data types of each column
+        st.dataframe(pd.DataFrame(st.session_state.data.dtypes, columns=['Data Type']))
     with tab2:
-        st.dataframe(data.describe())  # Summary statistics
+        st.dataframe(st.session_state.data.describe())
     with tab3:
-        missing = data.isnull().sum()
-        st.dataframe(pd.DataFrame({'Missing Values': missing, 'Percentage': (missing/len(data))*100}))  # Show missing values %
+        missing = st.session_state.data.isnull().sum()
+        st.dataframe(pd.DataFrame({'Missing Values': missing, 'Percentage': (missing/len(st.session_state.data))*100}))
 
 elif page == "📈 Market Analysis":
-    # Visualizations for understanding the housing market trends
     st.markdown("### 📈 NYC Housing Market Trends")
     
     col1, col2 = st.columns([3, 1])
     with col1:
-        price_log = st.checkbox("Use logarithmic scale", value=True)  # Option to log-scale prices for better visualization
+        price_log = st.checkbox("Use logarithmic scale", value=True)
     with col2:
-        bin_size = st.slider("Bin size", 10, 100, 50)  # Control histogram bin size
+        bin_size = st.slider("Bin size", 10, 100, 50)
     
     fig, ax = plt.subplots(figsize=(10, 6))
     if price_log:
-        sns.histplot(np.log1p(data['PRICE']), bins=bin_size, kde=True, ax=ax, color='#4a6fa5')  # Histogram of log prices
+        sns.histplot(np.log1p(st.session_state.data['PRICE']), bins=bin_size, kde=True, ax=ax, color='#4a6fa5')
         ax.set_xlabel('Log(Price)')
     else:
-        sns.histplot(data['PRICE'], bins=bin_size, kde=True, ax=ax, color='#4a6fa5')  # Histogram of actual prices
+        sns.histplot(st.session_state.data['PRICE'], bins=bin_size, kde=True, ax=ax, color='#4a6fa5')
         ax.set_xlabel('Price ($)')
     ax.set_ylabel('Count')
     ax.grid(True, linestyle='--', alpha=0.7)
     st.pyplot(fig)
     
-    # Select type of market analysis: correlation matrix or scatter plot of feature vs price
     analysis_type = st.radio("Analysis Type", ["Correlation", "Feature vs Price"], horizontal=True)
     
     if analysis_type == "Correlation":
         fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(data.select_dtypes(include=np.number).corr(), annot=True, ax=ax, cmap='coolwarm')  # Correlation heatmap
+        sns.heatmap(st.session_state.data.select_dtypes(include=np.number).corr(), annot=True, ax=ax, cmap='coolwarm')
         st.pyplot(fig)
     else:
-        feature = st.selectbox("Select feature", data.select_dtypes(include=np.number).columns.drop('PRICE'))
+        feature = st.selectbox("Select feature", st.session_state.data.select_dtypes(include=np.number).columns.drop('PRICE'))
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.scatterplot(x=data[feature], y=data['PRICE'], ax=ax, color='#4a6fa5')  # Scatter plot feature vs price
+        sns.scatterplot(x=st.session_state.data[feature], y=st.session_state.data['PRICE'], ax=ax, color='#4a6fa5')
         ax.set_xlabel(feature)
         ax.set_ylabel('Price ($)')
         ax.grid(True, linestyle='--', alpha=0.7)
         st.pyplot(fig)
 
 elif page == "🤖 Price Prediction Models":
-    # Train and evaluate machine learning models on the dataset
     st.markdown("### 🤖 Train Prediction Models")
     
     col1, col2 = st.columns(2)
     with col1:
-        test_size = st.slider("Test Size (%)", 10, 40, 20)  # User selects test set size
+        test_size = st.slider("Test Size (%)", 10, 40, 20)
     with col2:
-        random_state = st.number_input("Random State", 0, 100, 42)  # User sets random seed
+        random_state = st.number_input("Random State", 0, 100, 42)
     
     features = ['BEDS', 'BATH', 'PROPERTYSQFT', 'LATITUDE', 'LONGITUDE']
-    X = data[features]
-    y = data['PRICE']
-    
-    # Split data into training and test sets based on user input
+    X = st.session_state.data[features]
+    y = st.session_state.data['PRICE']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size/100, random_state=random_state)
     
-    # Define models to choose from
     models = {
         'Linear Regression': LinearRegression(),
         'Random Forest': RandomForestRegressor(random_state=random_state),
         'XGBoost': XGBRegressor(random_state=random_state)
     }
     
-    # Allow user to select which models to train
     selected_models = st.multiselect("Select Models", list(models.keys()), default=list(models.keys()))
     
     if st.button("Train Models"):
         results = []
         for name in selected_models:
-            # Create a pipeline: scale features then train model
             model = Pipeline([
                 ('scaler', StandardScaler()),
                 ('model', models[name])
             ]).fit(X_train, y_train)
             
             y_pred = model.predict(X_test)
-            # Collect performance metrics
             results.append({
                 'Model': name,
                 'R2': r2_score(y_test, y_pred),
@@ -262,11 +284,9 @@ elif page == "🤖 Price Prediction Models":
                 'RMSE': np.sqrt(mean_squared_error(y_test, y_pred))
             })
         
-        # Show results in a nice table with color gradients
         st.dataframe(pd.DataFrame(results).set_index('Model').style.background_gradient(cmap='Blues'))
 
 elif page == "💲 Get Price Estimate":
-    # Allow users to input home features and get a predicted price
     st.markdown("### 💲 Predict Your Home's Value")
     
     col1, col2 = st.columns(2)
@@ -279,13 +299,11 @@ elif page == "💲 Get Price Estimate":
         lon = st.number_input("Longitude", -74.5, -73.5, -74.0060)
     
     if st.button("Estimate Price"):
-        # Train a simple Random Forest on full dataset for prediction
         model = Pipeline([
             ('scaler', StandardScaler()),
             ('model', RandomForestRegressor())
-        ]).fit(data[['BEDS', 'BATH', 'PROPERTYSQFT', 'LATITUDE', 'LONGITUDE']], data['PRICE'])
+        ]).fit(st.session_state.data[['BEDS', 'BATH', 'PROPERTYSQFT', 'LATITUDE', 'LONGITUDE']], st.session_state.data['PRICE'])
         
-        # Predict price based on user inputs
         prediction = model.predict([[beds, bath, sqft, lat, lon]])[0]
         st.success(f"Estimated Value: ${prediction:,.0f}")
 
