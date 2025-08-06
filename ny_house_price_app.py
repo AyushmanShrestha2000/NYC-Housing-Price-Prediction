@@ -129,7 +129,7 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-@st.cache_data
+@st.cache_resource
 def load_data():
     try:
         # Replace with your raw GitHub URL
