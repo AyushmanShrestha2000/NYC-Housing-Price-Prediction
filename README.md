@@ -1,12 +1,4 @@
-##NYC Housing Price Prediction App
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.22.0-red)
-![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.2.2-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
 
-A Streamlit web application for predicting New York City housing prices using machine learning models with comprehensive data analysis capabilities.
-
-![App Screenshot](https://via.placeholder.com/800x500?text=NYC+Housing+Price+Prediction+App)
 
 
 ## Features 
