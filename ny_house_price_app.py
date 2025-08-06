@@ -171,17 +171,6 @@ with st.sidebar:
         index=0,
         label_visibility="collapsed"
     )
-    
-    # Debug info
-    with st.expander("ℹ️ Data Source Info"):
-        if 'data_source' in st.session_state:
-            st.success(f"Data loaded from: {st.session_state.data_source}")
-        else:
-            st.warning("Data source not recorded")
-        
-        if st.button("🔄 Reload Data"):
-            st.session_state.data = load_data()
-            st.rerun()
 
 # ==============================================
 # MAIN PAGE CONTENT
