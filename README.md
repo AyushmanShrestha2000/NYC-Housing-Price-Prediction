@@ -17,7 +17,7 @@ This project uses machine learning to estimate pricing of properties in New York
 - Data Visualization: Matplotlib, Seaborn
 - Data Processing: Pandas, NumPy
 
-## Installation 
+# Installation 
 Clone the repository:
    ```bash
    git clone https://github.com/AyushmanShrestha2000/NYC-Housing-Price-Prediction
