@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -20,11 +19,11 @@ warnings.filterwarnings('ignore')
 # ==============================================
 # DATA LOADING WITH FALLBACK SOURCES
 # ==============================================
-@st.cache_data(ttl=3600)  # Cache for 1 hour
+@st.cache_data(ttl=3600)  
 def load_data():
     """Load dataset with multiple fallback sources"""
     data_sources = [
-        # Primary source - GitHub raw URL
+        # Primary source - GitHub URL
         "https://raw.githubusercontent.com/AyushmanShrestha2000/nyc-housing/main/NY-House-Dataset.csv",
         
         # Fallback sources
