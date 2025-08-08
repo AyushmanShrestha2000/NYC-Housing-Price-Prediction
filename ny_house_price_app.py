@@ -175,12 +175,14 @@ with st.sidebar:
 # MAIN PAGE CONTENT
 # ==============================================
 # Create tabs
-
+# Display main header/title
 st.markdown('<h1 class="main-header"> NYC Home Price Predictor</h1>', unsafe_allow_html=True)
 
+# Check Dataset Overview
 if page == " Dataset Overview":
     st.markdown("###  Explore the NYC Housing Dataset")
-    
+
+    # Create two columns for metrics display
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Total Properties", f"{st.session_state.data.shape[0]:,}")
@@ -188,10 +190,12 @@ if page == " Dataset Overview":
     with col2:
         st.metric("Average Price", f"${st.session_state.data['PRICE'].mean():,.0f}")
         st.metric("Price Range", f"${st.session_state.data['PRICE'].min():,.0f} - ${st.session_state.data['PRICE'].max():,.0f}")
-    
+
+    # Create expandable section for data preview
     with st.expander(" Data Preview", expanded=True):
         st.dataframe(st.session_state.data.head(10))
-    
+
+    # Create tabs for different data views
     tab1, tab2, tab3 = st.tabs([" Structure", " Statistics", " Missing Data"])
     with tab1:
         st.dataframe(pd.DataFrame(st.session_state.data.dtypes, columns=['Data Type']))
@@ -203,13 +207,15 @@ if page == " Dataset Overview":
 
 elif page == " Market Analysis":
     st.markdown("###  NYC Housing Market Trends")
-    
+
+    # Display section header
     col1, col2 = st.columns([3, 1])
     with col1:
         price_log = st.checkbox("Use logarithmic scale", value=True)
     with col2:
         bin_size = st.slider("Bin size", 10, 100, 50)
-    
+
+     # Create matplotlib figure 
     fig, ax = plt.subplots(figsize=(10, 6))
     if price_log:
         sns.histplot(np.log1p(st.session_state.data['PRICE']), bins=bin_size, kde=True, ax=ax, color='#4a6fa5')
@@ -220,15 +226,19 @@ elif page == " Market Analysis":
     ax.set_ylabel('Count')
     ax.grid(True, linestyle='--', alpha=0.7)
     st.pyplot(fig)
-    
+
+    # Correlation or Feature vs Price
     analysis_type = st.radio("Analysis Type", ["Correlation", "Feature vs Price"], horizontal=True)
     
     if analysis_type == "Correlation":
+        # Create correlation heatmap of all numerical features
         fig, ax = plt.subplots(figsize=(10, 8))
         sns.heatmap(st.session_state.data.select_dtypes(include=np.number).corr(), annot=True, ax=ax, cmap='coolwarm')
         st.pyplot(fig)
     else:
+        # Dropdown to select feature for scatter plot against price
         feature = st.selectbox("Select feature", st.session_state.data.select_dtypes(include=np.number).columns.drop('PRICE'))
+        # Create scatter plot of selected feature vs price
         fig, ax = plt.subplots(figsize=(10, 6))
         sns.scatterplot(x=st.session_state.data[feature], y=st.session_state.data['PRICE'], ax=ax, color='#4a6fa5')
         ax.set_xlabel(feature)
@@ -236,20 +246,25 @@ elif page == " Market Analysis":
         ax.grid(True, linestyle='--', alpha=0.7)
         st.pyplot(fig)
 
+# Price Prediction Models page
 elif page == " Price Prediction Models":
     st.markdown("###  Train Prediction Models")
-    
+
+     # Create two columns for configuration options
     col1, col2 = st.columns(2)
     with col1:
         test_size = st.slider("Test Size (%)", 10, 40, 20)
     with col2:
         random_state = st.number_input("Random State", 0, 100, 42)
-    
+
+    # Define features and target variable
     features = ['BEDS', 'BATH', 'PROPERTYSQFT', 'LATITUDE', 'LONGITUDE']
     X = st.session_state.data[features]
     y = st.session_state.data['PRICE']
+    # Split data into train/test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size/100, random_state=random_state)
-    
+
+    # Dictionary of available models
     models = {
         'Linear Regression': LinearRegression(),
         'Random Forest': RandomForestRegressor(random_state=random_state),
@@ -257,15 +272,18 @@ elif page == " Price Prediction Models":
     }
     
     selected_models = st.multiselect("Select Models", list(models.keys()), default=list(models.keys()))
-    
+
+    # Button to trigger model training
     if st.button("Train Models"):
         results = []
         for name in selected_models:
+            # Create pipeline with scaling and model
             model = Pipeline([
                 ('scaler', StandardScaler()),
                 ('model', models[name])
             ]).fit(X_train, y_train)
-            
+
+             # Make predictions and calculate metrics
             y_pred = model.predict(X_test)
             results.append({
                 'Model': name,
@@ -273,12 +291,15 @@ elif page == " Price Prediction Models":
                 'MAE': mean_absolute_error(y_test, y_pred),
                 'RMSE': np.sqrt(mean_squared_error(y_test, y_pred))
             })
-        
+
+         # Display results as styled dataframe with gradient
         st.dataframe(pd.DataFrame(results).set_index('Model').style.background_gradient(cmap='Blues'))
 
+# Price Estimation page
 elif page == " Get Price Estimate":
     st.markdown("###  Predict Your Home's Value")
-    
+
+    # Input controls in two columns
     col1, col2 = st.columns(2)
     with col1:
         beds = st.slider("Bedrooms", 1, 10, 2)
@@ -287,13 +308,16 @@ elif page == " Get Price Estimate":
     with col2:
         lat = st.number_input("Latitude", 40.5, 41.0, 40.7128)
         lon = st.number_input("Longitude", -74.5, -73.5, -74.0060)
-    
+
+    # Button to trigger prediction
     if st.button("Estimate Price"):
+        # Create and train model pipeline
         model = Pipeline([
             ('scaler', StandardScaler()),
             ('model', RandomForestRegressor())
         ]).fit(st.session_state.data[['BEDS', 'BATH', 'PROPERTYSQFT', 'LATITUDE', 'LONGITUDE']], st.session_state.data['PRICE'])
-        
+
+        # Make prediction and display result
         prediction = model.predict([[beds, bath, sqft, lat, lon]])[0]
         st.success(f"Estimated Value: ${prediction:,.0f}")
 
