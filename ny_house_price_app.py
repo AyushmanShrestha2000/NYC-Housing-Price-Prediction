@@ -58,7 +58,7 @@ if 'data' not in st.session_state:
     st.session_state.data_loaded = st.session_state.data is not None
 
 if not st.session_state.get('data_loaded', False):
-    st.error("❗ Dataset not loaded. Please check the data file.")
+    st.error(" Dataset not loaded. Please check the data file.")
     st.stop()
 
 # ==============================================
@@ -68,7 +68,7 @@ st.set_page_config(
     page_title="NYC Home Price Predictor", 
     layout="wide",
     initial_sidebar_state="expanded",
-    page_icon="🏠"
+    page_icon=""
 )
 
 st.markdown("""
@@ -161,13 +161,13 @@ st.markdown("""
 # ==============================================
 with st.sidebar:
     st.markdown('<div style="text-align: center; margin-bottom: 2rem;">'
-                '<h2 style="color: white; margin-bottom: 0;">🏠 NYC Home Price Predictor</h2>'
+                '<h2 style="color: white; margin-bottom: 0;"> NYC Home Price Predictor</h2>'
                 '<p style="color: #ecf0f1;">AI-powered real estate valuation</p>'
                 '</div>', unsafe_allow_html=True)
     
     page = st.radio(
         "Menu",
-        ["📋 Dataset Overview", "📈 Market Analysis", "🤖 Price Prediction Models", "💲 Get Price Estimate"],
+        [" Dataset Overview", " Market Analysis", " Price Prediction Models", " Get Price Estimate"],
         index=0,
         label_visibility="collapsed"
     )
@@ -175,10 +175,10 @@ with st.sidebar:
 # ==============================================
 # MAIN PAGE CONTENT
 # ==============================================
-st.markdown('<h1 class="main-header">🏠 NYC Home Price Predictor</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header"> NYC Home Price Predictor</h1>', unsafe_allow_html=True)
 
-if page == "📋 Dataset Overview":
-    st.markdown("### 📊 Explore the NYC Housing Dataset")
+if page == " Dataset Overview":
+    st.markdown("###  Explore the NYC Housing Dataset")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -188,10 +188,10 @@ if page == "📋 Dataset Overview":
         st.metric("Average Price", f"${st.session_state.data['PRICE'].mean():,.0f}")
         st.metric("Price Range", f"${st.session_state.data['PRICE'].min():,.0f} - ${st.session_state.data['PRICE'].max():,.0f}")
     
-    with st.expander("🔍 Data Preview", expanded=True):
+    with st.expander(" Data Preview", expanded=True):
         st.dataframe(st.session_state.data.head(10))
     
-    tab1, tab2, tab3 = st.tabs(["📝 Structure", "📈 Statistics", "❓ Missing Data"])
+    tab1, tab2, tab3 = st.tabs([" Structure", " Statistics", " Missing Data"])
     with tab1:
         st.dataframe(pd.DataFrame(st.session_state.data.dtypes, columns=['Data Type']))
     with tab2:
@@ -200,8 +200,8 @@ if page == "📋 Dataset Overview":
         missing = st.session_state.data.isnull().sum()
         st.dataframe(pd.DataFrame({'Missing Values': missing, 'Percentage': (missing/len(st.session_state.data))*100}))
 
-elif page == "📈 Market Analysis":
-    st.markdown("### 📈 NYC Housing Market Trends")
+elif page == " Market Analysis":
+    st.markdown("###  NYC Housing Market Trends")
     
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -235,8 +235,8 @@ elif page == "📈 Market Analysis":
         ax.grid(True, linestyle='--', alpha=0.7)
         st.pyplot(fig)
 
-elif page == "🤖 Price Prediction Models":
-    st.markdown("### 🤖 Train Prediction Models")
+elif page == " Price Prediction Models":
+    st.markdown("###  Train Prediction Models")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -275,8 +275,8 @@ elif page == "🤖 Price Prediction Models":
         
         st.dataframe(pd.DataFrame(results).set_index('Model').style.background_gradient(cmap='Blues'))
 
-elif page == "💲 Get Price Estimate":
-    st.markdown("### 💲 Predict Your Home's Value")
+elif page == " Get Price Estimate":
+    st.markdown("###  Predict Your Home's Value")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -302,6 +302,6 @@ elif page == "💲 Get Price Estimate":
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #4a6fa5; font-size: 14px;'>
-    🏙️ NYC Housing Market Dashboard | Built with Streamlit
+      NYC Housing Market Dashboard | Built with Streamlit
 </div>
 """, unsafe_allow_html=True)
