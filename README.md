@@ -57,4 +57,4 @@ ny-housing-price-prediction/
 ├── README.md             # This file
 ├── requirements.txt      # Python dependencies
 
-Data source: [Kaggle New York Housing Market] (https://www.kaggle.com/datasets/nelgiriyewithana/new-york-housing-market?resource=download)
+Data source: [Kaggle New York Housing Market](https://www.kaggle.com/datasets/nelgiriyewithana/new-york-housing-market?resource=download)
