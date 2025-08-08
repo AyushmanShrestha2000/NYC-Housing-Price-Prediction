@@ -174,6 +174,8 @@ with st.sidebar:
 # ==============================================
 # MAIN PAGE CONTENT
 # ==============================================
+# Create tabs
+
 st.markdown('<h1 class="main-header"> NYC Home Price Predictor</h1>', unsafe_allow_html=True)
 
 if page == " Dataset Overview":
