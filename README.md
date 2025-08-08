@@ -1,8 +1,10 @@
+# New York Housing Price Prediction
 
-
+## Project Overview
+This project helps estimate New York housing prices using machine learning. It analyzes property features like location, size, and room counts from a Kaggle dataset of 4,800+ listings. The Random Forest model performed best with 64% accuracy (R² score). The solution includes an interactive dashboard for exploring data and getting price estimates.
 
 ## Features 
-- **Interactive Dashboard**: Beautifully designed UI with custom styling
+- **Interactive Dashboard**:
 - **Data Exploration**: 
   - Dataset overview with statistics
   - Missing value analysis
@@ -32,30 +34,25 @@
 ## Installation 
 Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/ny-housing-price-prediction.git
+   git clone https://github.com/AyushmanShrestha2000/NYC-Housing-Price-Prediction
    cd ny-housing-price-prediction
-
 
 ##Create and activate a virtual environment:
 python -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
-
 ##Install dependencies:
 pip install -r requirements.txt
-
 
 ##Download the dataset:
 Place NY-House-Dataset.csv in the project root directory
 
-
 ##Run the application:
 streamlit run app.py
-
 
 ##File Structure 
 ny-housing-price-prediction/
 ├── app.py                # Main Streamlit application
 ├── NY-House-Dataset.csv  # Housing dataset 
 ├── README.md             # This file
-├── requirements.txt      # Python dependencies             
+├── requirements.txt      # Python dependencies
