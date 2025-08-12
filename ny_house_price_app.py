@@ -166,7 +166,7 @@ with st.sidebar:
     
     page = st.radio(
         "Menu",
-        [" Dataset Overview", " Market Analysis", " Price Prediction Models", " Get Price Estimate"],
+        [ " Get Price Estimate", " Dataset Overview", " Market Analysis", " Price Prediction Models"],
         index=0,
         label_visibility="collapsed"
     )
