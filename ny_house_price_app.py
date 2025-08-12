@@ -160,7 +160,7 @@ st.markdown("""
 # ==============================================
 with st.sidebar:
     st.markdown('<div style="text-align: center; margin-bottom: 2rem;">'
-                '<h2 style="color: white; margin-bottom: 0;"> NYC Home Price Predictor</h2>'
+                '<h2 style="color: black; margin-bottom: 0;"> NYC Home Price Predictor</h2>'
                 '<p style="color: #ecf0f1;">AI-powered real estate valuation</p>'
                 '</div>', unsafe_allow_html=True)
     
